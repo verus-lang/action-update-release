@@ -17,6 +17,7 @@ Based on https://github.com/viperproject/create-nightly-release
     new_name: Release ${{ env.TAG_NAME }}
     new_body: New body for the release
     new_tag: ${{ env.TAG_NAME }}
+    delete_assets: true
 ```
 
 ## Create a new Release
