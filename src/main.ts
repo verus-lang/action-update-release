@@ -28,6 +28,26 @@ async function run(): Promise<void> {
     const new_body = core.getInput('new_body', {required: false});
     const new_tag = core.getInput('new_tag', {required: true});
     const commitish = github.context.sha;
+    const delete_assets = Boolean(core.getInput('delete_assets', {required: false})) || false;
+
+    if (delete_assets) {
+      // Delete all assets from release
+      // API Documentation: https://developer.github.com/v3/repos/releases/#delete-a-release-asset
+      // Octokit Documentation: https://octokit.github.io/rest.js/#octokit-routes-repos-delete-release-asset
+      const assets = await octokit.rest.repos.listReleaseAssets({
+        owner,
+        repo,
+        release_id: id
+      });
+
+      for (const asset of assets.data) {
+        await octokit.rest.repos.deleteReleaseAsset({
+          owner,
+          repo,
+          asset_id: asset.id
+        });
+      }
+    }
 
     // Create a release
     // API Documentation: https://developer.github.com/v3/repos/releases/#create-a-release
