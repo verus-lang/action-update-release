@@ -23,6 +23,9 @@ inputs:
   delete_tags_prefix:
     description: 'The prefix of the tags to delete. For example, `release/rolling`'
     required: false
+  delete_assets:
+    description: 'Delete the previous assets of the release.'
+    required: false
 outputs:
   id:
     description: 'The ID of the created Release'
