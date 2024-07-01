@@ -1,7 +1,7 @@
 {
-  "name": "create-nightly-release",
+  "name": "action-update-release",
   "version": "1.1.0",
-  "description": "GitHub action to create a new pre-release and delete old pre-releases created by this action",
+  "description": "GitHub action to update an existing (pre-)release.",
   "main": "lib/main.js",
   "scripts": {
     "build": "tsc",
@@ -16,16 +16,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/viperproject/create-nightly-release.git"
+    "url": "git+https://github.com/utaal/actions-update-release.git"
   },
   "keywords": [
-    "nightly",
     "release",
     "actions",
     "node"
   ],
   "author": {
-    "name": "Chair of Programming Methodology, ETH Zurich"
+    "name": "Andrea Lattuada"
   },
   "license": "MPL-2.0",
   "dependencies": {

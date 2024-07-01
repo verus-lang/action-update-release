@@ -1,4 +1,4 @@
-create-nightly-release and all files of its source code are licensed under the Mozilla Public
+action-update-release and all files of its source code are licensed under the Mozilla Public
 License Version 2.0 (see below or http://www.mozilla.org/MPL/2.0/), with the
 following *exceptions*:
 
@@ -16,6 +16,10 @@ following *exceptions*:
     .github/dependabot.yml
     .github/workflows/test.yml
     test/main.test.ts
+
+action-update-release is derived from https://github.com/viperproject/create-nightly-release
+authored by "Chair of Programming Methodology, ETH Zurich", and distributed under the same
+license terms, as required by the Mozilla Public License Version 2.0
 
 
 Mozilla Public License Version 2.0

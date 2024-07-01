@@ -3,11 +3,11 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 //
 // Copyright (c) 2011-2020 ETH Zurich.
+// Copyright (c) 2024 Andrea Lattuada.
 
 import * as core from '@actions/core';
 import * as github from '@actions/github';
 import {GitHub} from '@actions/github/lib/utils';
-import {INVISIBLE_BODY_PREAMBLE} from './constants';
 
 async function run(): Promise<void> {
   try {
@@ -22,37 +22,26 @@ async function run(): Promise<void> {
     // Get owner and repo from context of payload that triggered the action
     const {owner: owner, repo: repo} = github.context.repo;
 
-    const keepNum: number =
-      Number(core.getInput('keep_num', {required: false})) || 0;
+    const delete_tags_prefix: string | null = core.getInput('delete_tags_prefix', {required: false});
+    const new_tag = core.getInput('new_tag', {required: true});
+    
+    if (delete_tags_prefix) {
+      // see https://docs.github.com/en/rest/repos/repos?apiVersion=2022-11-28#list-repository-tags
+      const {data: tags} = await octokit.rest.repos.listTags({
+        owner,
+        repo
+      });
 
-    const keepTags: boolean =
-      core.getInput('keep_tags', {required: false}) === 'true';
+      const tagsToBeDeleted = tags
+        .filter((tag: Tag) => tag.name.startsWith(delete_tags_prefix))
+        .filter((tag: Tag) => tag.name !== new_tag);
 
-    // see https://octokit.github.io/rest.js/v18#repos-list-releases
-    const {data: releases} = await octokit.rest.repos.listReleases({
-      owner,
-      repo
-    });
-
-    const releasesToBeDeleted = releases
-      .filter(release => release.prerelease)
-      // we assume that the releases are sorted by release date
-      // remove the first `keep` many releases:
-      .filter((_, index) => index > keepNum)
-      // remove releases not created by this action:
-      .filter(
-        release =>
-          release.body != null &&
-          release.body.startsWith(INVISIBLE_BODY_PREAMBLE())
-      )
-      // reverse releases to start deleting the oldest one:
-      .reverse();
-
-    for (const release of releasesToBeDeleted) {
-      await deleteRelease(octokit, owner, repo, release, keepTags);
-      core.info(`Release '${release.name}' was successfully deleted`);
+      for (const tag of tagsToBeDeleted) {
+        await deleteTag(octokit, owner, repo, tag);
+        core.info(`Release '${tag.name}' was successfully deleted`);
+      }
+      core.info(`${tagsToBeDeleted.length} release(s) have been deleted`);
     }
-    core.info(`${releasesToBeDeleted.length} release(s) have been deleted`);
   } catch (error) {
     if (error instanceof Error) {
       core.setFailed(error);
@@ -62,50 +51,31 @@ async function run(): Promise<void> {
   }
 }
 
-async function deleteRelease(
+async function deleteTag(
   octokit: InstanceType<typeof GitHub>,
   owner: string,
   repo: string,
-  release: Release,
-  keepTags: boolean
+  tag: Tag,
 ): Promise<void> {
-  // all assets have to be deleted first:
-  for (const asset of release.assets) {
-    // see https://octokit.github.io/rest.js/v18#repos-delete-release-asset
-    await octokit.rest.repos.deleteReleaseAsset({
-      owner,
-      repo,
-      asset_id: asset.id
-    });
-  }
-  // then delete the actual release:
-  // see https://octokit.github.io/rest.js/v18#repos-delete-release
-  await octokit.rest.repos.deleteRelease({
+  // see https://octokit.github.io/rest.js/v18#git-delete-ref
+  await octokit.rest.git.deleteRef({
     owner,
     repo,
-    release_id: release.id
+    ref: `tags/${tag.name}`
   });
-  if (!keepTags) {
-    // delete the associated tag:
-    // see https://octokit.github.io/rest.js/v18#git-delete-ref
-    await octokit.rest.git.deleteRef({
-      owner,
-      repo,
-      ref: `tags/${release.tag_name}`
-    });
-  }
 }
 
-interface Release {
-  id: number;
-  name: string | null;
-  body?: string | null | undefined;
-  tag_name: string;
-  assets: Asset[];
+interface Tag {
+  name: string;
+  commit: Commit;
+  zipball_url: string;
+  tarball_url: string;
+  node_id: string;
 }
 
-interface Asset {
-  id: number;
+interface Commit {
+  sha: string;
+  url: string;
 }
 
 run();
