@@ -3,11 +3,10 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 //
 // Copyright (c) 2011-2020 ETH Zurich.
+// Copyright (c) 2024 Andrea Lattuada.
 
 import * as core from '@actions/core';
-import * as fs from 'fs';
 import * as github from '@actions/github';
-import {INVISIBLE_BODY_PREAMBLE} from './constants';
 
 async function run(): Promise<void> {
   // partially taken from https://github.com/actions/create-release
@@ -24,50 +23,29 @@ async function run(): Promise<void> {
     const {owner: owner, repo: repo} = github.context.repo;
 
     // Get the inputs from the workflow file: https://github.com/actions/toolkit/tree/master/packages/core#inputsoutputs
-    const tagName = core.getInput('tag_name', {required: true});
-
-    // This removes the 'refs/tags' portion of the string, i.e. from 'refs/tags/v1.10.15' to 'v1.10.15'
-    const tag = tagName.replace('refs/tags/', '');
-    const releaseName = core
-      .getInput('release_name', {required: true})
-      .replace('refs/tags/', '');
-    const body = core.getInput('body', {required: false});
-    const draft = false;
-    const prerelease = true;
+    const id = Number(core.getInput('id', {required: true}));
+    const new_name = core.getInput('new_name', {required: false});
+    const new_body = core.getInput('new_body', {required: false});
+    const new_tag = core.getInput('new_tag', {required: true});
     const commitish = github.context.sha;
-
-    const bodyPath = core.getInput('body_path', {required: false});
-    let bodyFileContent = null;
-    if (bodyPath !== '' && !!bodyPath) {
-      try {
-        bodyFileContent = fs.readFileSync(bodyPath, {encoding: 'utf8'});
-      } catch (error) {
-        if (error instanceof Error) {
-          core.setFailed(error);
-        } else {
-          core.setFailed(`unknown error type ${error}`);
-        }
-      }
-    }
 
     // Create a release
     // API Documentation: https://developer.github.com/v3/repos/releases/#create-a-release
     // Octokit Documentation: https://octokit.github.io/rest.js/#octokit-routes-repos-create-release
-    const createReleaseResponse = await octokit.rest.repos.createRelease({
+    const updateReleaseResponse = await octokit.rest.repos.updateRelease({
       owner,
       repo,
-      tag_name: tag,
-      name: releaseName,
-      body: INVISIBLE_BODY_PREAMBLE() + (bodyFileContent || body),
-      draft,
-      prerelease,
-      target_commitish: commitish
+      release_id: id,
+      tag_name: new_tag,
+      name: new_name,
+      body: new_body,
+      target_commitish: commitish,
     });
 
     // Get the ID, html_url, and upload URL for the created Release from the response
     const {
       data: {id: releaseId, html_url: htmlUrl, upload_url: uploadUrl}
-    } = createReleaseResponse;
+    } = updateReleaseResponse;
 
     // Set the output variables for use by other actions: https://github.com/actions/toolkit/tree/master/packages/core#inputsoutputs
     core.setOutput('id', releaseId);

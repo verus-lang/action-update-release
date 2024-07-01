@@ -47,16 +47,15 @@ jobs:
       - uses: actions/checkout@v4
       - name: Create release tag
         shell: bash
-        run: echo "TAG_NAME=$(date +v-%Y-%m-%d-%H%M)" >> $GITHUB_ENV
-      - name: Create nightly release
-        id: create_release
+        run: echo "TAG_NAME=release/$(date +v-%Y-%m-%d-%H%M)" >> $GITHUB_ENV
+      - name: Update release
+        id: update_release
         uses: ./
         env:
-          # This token is provided by Actions, you do not need to create your own token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ env.TAG_NAME }}
-          release_name: Test Pre-Release ${{ env.TAG_NAME }}
-          body: Pre-release created by test job
-          keep_num: -1 # remove the just created release as well
-          keep_tags: false
+          id: 163436759
+          new_name: Release ${{ env.TAG_NAME }}
+          new_body: Updated release body
+          new_tag: ${{ env.TAG_NAME }}
+          delete_tags_prefix: release/

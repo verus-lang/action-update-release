@@ -1,38 +1,23 @@
-# create-nightly-release
+# action-update-release
 
-[![Test Status](https://github.com/viperproject/create-nightly-release/workflows/build-test/badge.svg?branch=main)](https://github.com/viperproject/create-nightly-release/actions?query=workflow%3Abuild-test+branch%3Amain)
-[![License: MPL 2.0](https://img.shields.io/badge/License-MPL%202.0-brightgreen.svg)](./LICENSE)
+GitHub action to update an existing pre-release.
 
-GitHub action to create a new pre-release and delete old pre-releases created by this action.
+Based on https://github.com/viperproject/create-nightly-release
 
 ## Usage
 ```
-- name: Create nightly release
-  id: create_release
-  uses: viperproject/create-nightly-release@v1
+- name: Update release
+  id: update_release
+  uses: utaal/action-update-release@v0.0.6
   env:
     # This token is provided by Actions, you do not need to create your own token
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   with:
-    tag_name: ${{ env.TAG_NAME }}
-    release_name: Nightly Release ${{ env.TAG_NAME }}
-    body: Body for the release
-    keep_num: 0
-    keep_tags: false
+    id: <release id>
+    new_name: Release ${{ env.TAG_NAME }}
+    new_body: New body for the release
+    new_tag: ${{ env.TAG_NAME }}
 ```
-
-### Inputs
-- `tag_name`: The name of the tag. (required)
-- `release_name`: The name of the release. For example, 'Release v1.0.1'. (required)
-- `body`: Text describing the release. (optional)
-- `body_path`: Path to a file whose content should be used as release body. (optional)
-- `keep_num`: Number of pre-releases that should be kept in addition to the newly created one. E.g. '0' deletes all previous pre-releases created by this action except the one that was just created. (optional, default: 0)
-- `keep_tags`: Specifies whether tags should be deleted if the corresponding release is deleted. (optional, default: false)
-
-### Outputs
-- `id`: The ID of the created release.
-- `html_url`: The URL users can navigate to in order to view the release.
-- `upload_url`: The URL for uploading assets to the release
 
 ## Create a new Release
 1. Checkout this repository and pull remote changes `git pull`
