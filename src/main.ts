@@ -42,11 +42,13 @@ async function run(): Promise<void> {
       });
 
       for (const asset of assets.data) {
-        await octokit.rest.repos.deleteReleaseAsset({
-          owner,
-          repo,
-          asset_id: asset.id
-        });
+        if (asset.name != "placeholder") {
+          await octokit.rest.repos.deleteReleaseAsset({
+            owner,
+            repo,
+            asset_id: asset.id
+          });
+        }
       }
     }
 
