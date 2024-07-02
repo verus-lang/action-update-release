@@ -30,9 +30,6 @@ async function run(): Promise<void> {
     const commitish = github.context.sha;
     const delete_assets =
       Boolean(core.getInput('delete_assets', {required: false})) || false;
-    const new_draft_status: boolean | null = Boolean(
-      core.getInput('new_draft_status', {required: false})
-    );
 
     if (delete_assets) {
       // Delete all assets from release
@@ -63,8 +60,7 @@ async function run(): Promise<void> {
       tag_name: new_tag,
       name: new_name,
       body: new_body,
-      target_commitish: commitish,
-      draft: new_draft_status
+      target_commitish: commitish
     });
 
     // Get the ID, html_url, and upload URL for the created Release from the response
