@@ -26,6 +26,9 @@ inputs:
   delete_assets:
     description: 'Delete the previous assets of the release.'
     required: false
+  new_draft_status:
+    description: 'The new draft status of the release. For example, `true`'
+    required: false
 outputs:
   id:
     description: 'The ID of the created Release'

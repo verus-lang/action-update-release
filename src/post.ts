@@ -22,9 +22,12 @@ async function run(): Promise<void> {
     // Get owner and repo from context of payload that triggered the action
     const {owner: owner, repo: repo} = github.context.repo;
 
-    const delete_tags_prefix: string | null = core.getInput('delete_tags_prefix', {required: false});
+    const delete_tags_prefix: string | null = core.getInput(
+      'delete_tags_prefix',
+      {required: false}
+    );
     const new_tag = core.getInput('new_tag', {required: true});
-    
+
     if (delete_tags_prefix) {
       // see https://docs.github.com/en/rest/repos/repos?apiVersion=2022-11-28#list-repository-tags
       const {data: tags} = await octokit.rest.repos.listTags({
@@ -55,7 +58,7 @@ async function deleteTag(
   octokit: InstanceType<typeof GitHub>,
   owner: string,
   repo: string,
-  tag: Tag,
+  tag: Tag
 ): Promise<void> {
   // see https://octokit.github.io/rest.js/v18#git-delete-ref
   await octokit.rest.git.deleteRef({
