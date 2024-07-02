@@ -33,7 +33,7 @@ async function run(): Promise<void> {
     );
     const commitish = github.context.sha;
 
-    if (new_draft_status) {
+    if (new_draft_status !== null) {
       await octokit.rest.repos.updateRelease({
         owner,
         repo,
