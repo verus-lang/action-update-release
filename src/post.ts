@@ -31,13 +31,15 @@ async function run(): Promise<void> {
     const new_draft_status: boolean | null = Boolean(
       core.getInput('new_draft_status', {required: false})
     );
+    const commitish = github.context.sha;
 
     if (new_draft_status) {
       await octokit.rest.repos.updateRelease({
         owner,
         repo,
         release_id: id,
-        draft: new_draft_status
+        draft: new_draft_status,
+        target_commitish: commitish
       });
     }
 
