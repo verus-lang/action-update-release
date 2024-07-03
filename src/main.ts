@@ -26,7 +26,7 @@ async function run(): Promise<void> {
     const id = Number(core.getInput('id', {required: true}));
     const new_name = core.getInput('new_name', {required: false});
     const new_body = core.getInput('new_body', {required: false});
-    const new_tag = core.getInput('new_tag', {required: true});
+    const new_tag = core.getInput('new_tag', {required: false});
     const commitish = github.context.sha;
     const delete_assets =
       Boolean(core.getInput('delete_assets', {required: false})) || false;

@@ -19,7 +19,7 @@ inputs:
     required: false
   new_tag:
     description: 'The new tag for the release. For example, `release/rolling/2024-01-01`'
-    required: true
+    required: false
   delete_tags_prefix:
     description: 'The prefix of the tags to delete. For example, `release/rolling`'
     required: false
