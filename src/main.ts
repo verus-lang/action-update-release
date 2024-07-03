@@ -8,6 +8,15 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
 
+// Function to turn empty string to null
+function emptyStringToUndefined(s: string): string | undefined {
+  if (s === '') {
+    return undefined;
+  } else {
+    return s;
+  }
+}
+
 async function run(): Promise<void> {
   // partially taken from https://github.com/actions/create-release
   try {
@@ -24,9 +33,15 @@ async function run(): Promise<void> {
 
     // Get the inputs from the workflow file: https://github.com/actions/toolkit/tree/master/packages/core#inputsoutputs
     const id = Number(core.getInput('id', {required: true}));
-    const new_name = core.getInput('new_name', {required: false});
-    const new_body = core.getInput('new_body', {required: false});
-    const new_tag = core.getInput('new_tag', {required: false});
+    const new_name = emptyStringToUndefined(
+      core.getInput('new_name', {required: false})
+    );
+    const new_body = emptyStringToUndefined(
+      core.getInput('new_body', {required: false})
+    );
+    const new_tag = emptyStringToUndefined(
+      core.getInput('new_tag', {required: false})
+    );
     const commitish = github.context.sha;
     const delete_assets =
       Boolean(core.getInput('delete_assets', {required: false})) || false;
@@ -84,7 +99,7 @@ async function run(): Promise<void> {
       core.info(`${tagsToBeDeleted.length} release(s) have been deleted`);
     }
 
-    if (new_tag !== null) {
+    if (new_tag !== undefined) {
       core.info(`Creating tag '${new_tag}' from commit '${commitish}'`);
       // Create a new tag
       // API Documentation: https://developer.github.com/v3/git/tags/#create-a-tag-object
@@ -112,24 +127,47 @@ async function run(): Promise<void> {
 
     let getUpdateReleaseResponse;
     if (
-      new_tag !== null ||
-      new_name !== null ||
-      new_body !== null ||
-      commitish !== null ||
-      new_draft_status !== null
+      new_tag !== undefined ||
+      new_name !== undefined ||
+      new_body !== undefined ||
+      commitish !== undefined ||
+      new_draft_status !== undefined
     ) {
-      // API Documentation: https://developer.github.com/v3/repos/releases
-      // Octokit Documentation: https://octokit.github.io/rest.js
-      getUpdateReleaseResponse = await octokit.rest.repos.updateRelease({
+      let updateReleaseParams: {
+        owner: string;
+        repo: string;
+        release_id: number;
+        target_commitish: string;
+        tag_name: string | undefined;
+        name: string | undefined;
+        body: string | undefined;
+        draft: boolean | undefined;
+      } = {
         owner,
         repo,
         release_id: id,
-        tag_name: new_tag,
-        name: new_name,
-        body: new_body,
         target_commitish: commitish,
-        draft: new_draft_status
-      });
+        tag_name: undefined,
+        name: undefined,
+        body: undefined,
+        draft: undefined
+      };
+      if (new_tag !== null) {
+        updateReleaseParams = {...updateReleaseParams, tag_name: new_tag};
+      }
+      if (new_name !== null) {
+        updateReleaseParams = {...updateReleaseParams, name: new_name};
+      }
+      if (new_body !== null) {
+        updateReleaseParams = {...updateReleaseParams, body: new_body};
+      }
+      if (new_draft_status !== null) {
+        updateReleaseParams = {...updateReleaseParams, draft: new_draft_status};
+      }
+      // API Documentation: https://developer.github.com/v3/repos/releases
+      // Octokit Documentation: https://octokit.github.io/rest.js
+      getUpdateReleaseResponse =
+        await octokit.rest.repos.updateRelease(updateReleaseParams);
       core.info(
         `Release ${id} was successfully updated, with the following changes:\n` +
           `- tag_name: ${new_tag}\n - name: ${new_name}\n - body: ${new_body}\n - target_commitish: ${commitish}\n - draft: ${new_draft_status}`
