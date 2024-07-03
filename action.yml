@@ -39,7 +39,6 @@ outputs:
 runs:
   using: 'node12'
   main: 'dist/main/index.js'
-  post: 'dist/post/index.js'
 branding:
   icon: 'tag'
   color: 'gray-dark'

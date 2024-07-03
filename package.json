@@ -8,9 +8,8 @@
     "format": "prettier --write **/*.ts",
     "format-check": "prettier --check **/*.ts",
     "lint": "eslint src/**/*.ts",
-    "package": "npm run package-main && npm run package-post",
+    "package": "npm run package-main",
     "package-main": "ncc build src/main.ts --source-map --license licenses.txt --out dist/main",
-    "package-post": "ncc build src/post.ts --source-map --license licenses.txt --out dist/post",
     "test": "jest",
     "all": "npm run build && npm run format && npm run lint && npm run package && npm test"
   },
