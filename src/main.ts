@@ -37,6 +37,9 @@ async function run(): Promise<void> {
     const new_draft_status: boolean | null = Boolean(
       core.getInput('new_draft_status', {required: false})
     );
+    core.info(
+      `arguments: ${JSON.stringify({id, new_name, new_body, new_tag, commitish, delete_assets, delete_tags_prefix, new_draft_status})}`
+    );
 
     if (delete_assets) {
       // Delete all assets from release
@@ -81,6 +84,32 @@ async function run(): Promise<void> {
       core.info(`${tagsToBeDeleted.length} release(s) have been deleted`);
     }
 
+    if (new_tag !== null) {
+      core.info(`Creating tag '${new_tag}' from commit '${commitish}'`);
+      // Create a new tag
+      // API Documentation: https://developer.github.com/v3/git/tags/#create-a-tag-object
+      // Octokit Documentation: https://octokit.github.io/rest.js/#octokit-routes-git-create-tag
+      const newTag = await octokit.rest.git.createTag({
+        owner,
+        repo,
+        tag: new_tag,
+        message: `release ${new_tag}`,
+        object: commitish,
+        type: 'commit'
+      });
+
+      // Create a new reference
+      // API Documentation: https://developer.github.com/v3/git/refs/#create-a-reference
+      // Octokit Documentation: https://octokit.github.io/rest.js/#octokit-routes-git-create-ref
+      await octokit.rest.git.createRef({
+        owner,
+        repo,
+        ref: `refs/tags/${new_tag}`,
+        sha: newTag.data.sha
+      });
+      core.info(`Tag '${new_tag}' was successfully created`);
+    }
+
     let getUpdateReleaseResponse;
     if (
       new_tag !== null ||
@@ -101,6 +130,10 @@ async function run(): Promise<void> {
         target_commitish: commitish,
         draft: new_draft_status
       });
+      core.info(
+        `Release ${id} was successfully updated, with the following changes:\n` +
+          `- tag_name: ${new_tag}\n - name: ${new_name}\n - body: ${new_body}\n - target_commitish: ${commitish}\n - draft: ${new_draft_status}`
+      );
     } else {
       getUpdateReleaseResponse = await octokit.rest.repos.getRelease({
         owner,
