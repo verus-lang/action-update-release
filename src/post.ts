@@ -39,8 +39,12 @@ async function run(): Promise<void> {
         repo,
         release_id: id,
         draft: new_draft_status,
+        tag_name: new_tag,
         target_commitish: commitish
       });
+      core.info(
+        `Release was successfully updated to '${new_tag}' with commit ${commitish}`
+      );
     }
 
     if (delete_tags_prefix) {
@@ -56,7 +60,7 @@ async function run(): Promise<void> {
 
       for (const tag of tagsToBeDeleted) {
         await deleteTag(octokit, owner, repo, tag);
-        core.info(`Release '${tag.name}' was successfully deleted`);
+        core.info(`Tag '${tag.name}' was successfully deleted`);
       }
       core.info(`${tagsToBeDeleted.length} release(s) have been deleted`);
     }
