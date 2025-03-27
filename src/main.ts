@@ -85,7 +85,7 @@ async function run(): Promise<void> {
       }
     }
 
-    if (delete_tags_prefix !== null) {
+    if (delete_tags_prefix !== null && delete_tags_prefix !== "") {
       // see https://docs.github.com/en/rest/repos/repos?apiVersion=2022-11-28#list-repository-tags
       const {data: tags} = await octokit.rest.repos.listTags({
         owner,
