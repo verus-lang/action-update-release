@@ -8,7 +8,7 @@ Based on https://github.com/viperproject/create-nightly-release
 ```
 - name: Update release
   id: update_release
-  uses: utaal/action-update-release@v0.0.6
+  uses: verus-lang/action-update-release@v0.0.6
   env:
     # This token is provided by Actions, you do not need to create your own token
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
